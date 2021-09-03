@@ -90,19 +90,18 @@ export default class YNRSASocket {
         return await YNRSASocket.create(socket, {
             publicKey: cryptico.publicKeyString(privateKey),
             encrypt(data: string, publicKey: string) {
-                const encrypted = cryptico.encrypt(
-                    data.toString(),
-                    publicKey,
-                    privateKey
-                );
+                const encrypted = cryptico.encrypt(data, publicKey, privateKey);
                 if (encrypted.status !== 'success') {
                     throw new Error('Encryption failed');
                 }
                 return encrypted.cipher;
             },
             decrypt(data: string, expectedPublicKey: string) {
-                const decrypted = cryptico.decrypt(data.toString(), privateKey);
-                if (decrypted.status !== 'verified') {
+                const decrypted = cryptico.decrypt(data, privateKey);
+                if (decrypted.status !== 'success') {
+                    throw new Error('Decryption failed');
+                }
+                if (decrypted.signature !== 'verified') {
                     throw new Error('Decryption not verified');
                 }
                 if (decrypted.publicKeyString !== expectedPublicKey) {
